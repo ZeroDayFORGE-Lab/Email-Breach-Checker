@@ -11,6 +11,9 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: __dirname });
+});
 
 // ---- Config (from .env, never hardcode keys) ----
 const HIBP_API_KEY = process.env.HIBP_API_KEY;
@@ -125,6 +128,10 @@ security questions, phone numbers). Keep it under 120 words, plain text, no mark
   return text || 'Change your passwords on the affected sites and enable two-factor authentication.';
 }
 
-app.listen(PORT, () => {
-  console.log(`Breach checker running at http://localhost:${PORT}/`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Breach checker running at http://localhost:${PORT}/`);
+  });
+}
+
+module.exports = app;
