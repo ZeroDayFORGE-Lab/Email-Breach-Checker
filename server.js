@@ -4,16 +4,18 @@
 // breach results to a database, file, or log. Nothing is stored, so there
 // is nothing to "delete" later — privacy by default.
 
+const path = require('path');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+const publicDir = path.join(__dirname, 'public');
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(publicDir));
 app.get('/', (req, res) => {
-  res.sendFile('index.html', { root: __dirname });
+  res.sendFile('index.html', { root: publicDir });
 });
 
 // ---- Config (from .env, never hardcode keys) ----
@@ -42,7 +44,8 @@ function isValidEmail(email) {
 }
 
 // ---- Route: check an email against HIBP ----
-app.post('/check-email', checkLimiter, async (req, res) => {
+// Local uses POST /check-email. On Vercel the rewrite lands on /api.
+async function checkEmail(req, res) {
   const { email } = req.body;
 
   if (!isValidEmail(email)) {
@@ -93,7 +96,11 @@ app.post('/check-email', checkLimiter, async (req, res) => {
     console.error('Error during breach check:', err.message);
     return res.status(500).json({ error: 'Something went wrong. Please try again later.' });
   }
-});
+}
+
+app.post('/check-email', checkLimiter, checkEmail);
+app.post('/api', checkLimiter, checkEmail);
+app.post('/api/check-email', checkLimiter, checkEmail);
 
 // ---- AI advice generation (metadata-only, no PII sent) ----
 async function getAiAdvice(breachSummary) {
