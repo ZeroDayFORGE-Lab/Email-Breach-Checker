@@ -1,0 +1,27 @@
+{
+  "name": "breach-checker",
+  "version": "1.0.0",
+  "description": "Simple email breach checker using the HIBP API and AI-generated protection advice.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZeroDayFORGE-Lab/Email-Breach-Checker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ZeroDayFORGE-Lab/Email-Breach-Checker/issues"
+  },
+  "homepage": "https://github.com/ZeroDayFORGE-Lab/Email-Breach-Checker#readme"
+}

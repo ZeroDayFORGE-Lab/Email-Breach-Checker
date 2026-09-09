@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Check whether your email appears in known data breaches.">
+<title>Signal Check | Email breach monitor</title>
+<style>
+  :root {
+    --ink: #102a43;
+    --muted: #627d98;
+    --paper: #f6f8f5;
+    --panel: #ffffff;
+    --line: #d9e2e8;
+    --coral: #e85d4a;
+    --coral-dark: #b83e31;
+    --mint: #d9f0e8;
+    --mint-dark: #1c765d;
+    --sun: #f7c948;
+    --navy: #102a43;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-width: 320px;
+    color: var(--ink);
+    background: var(--paper);
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  }
+  a { color: inherit; }
+  .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+  .topbar {
+    border-bottom: 1px solid rgba(16, 42, 67, 0.12);
+    background: rgba(246, 248, 245, 0.94);
+  }
+  .topbar-inner { display: flex; align-items: center; justify-content: space-between; min-height: 76px; gap: 20px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: 0.01em; }
+  .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px 10px 10px 3px; color: #fff; background: var(--coral); font-size: 18px; transform: rotate(-8deg); }
+  .brand-mark span { transform: rotate(8deg); }
+  .brand small { display: block; color: var(--muted); font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
+  .nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px 20px; color: var(--muted); font-size: 13px; }
+  .nav span:last-child { color: var(--coral-dark); font-weight: 700; }
+  .hero { padding: 76px 0 58px; background: linear-gradient(135deg, #f6f8f5 0%, #f6f8f5 63%, #e8f2ed 63%, #e8f2ed 100%); }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: center; gap: 80px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 22px; color: var(--coral-dark); font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--coral); }
+  h1 { max-width: 660px; margin: 0; font-family: Georgia, serif; font-size: clamp(42px, 6vw, 76px); font-weight: 400; letter-spacing: 0; line-height: 0.98; }
+  .hero-copy { max-width: 590px; margin: 25px 0 0; color: var(--muted); font-size: 18px; line-height: 1.65; }
+  .checker { position: relative; padding: 29px; border: 1px solid rgba(16, 42, 67, 0.1); border-radius: 14px; background: var(--panel); box-shadow: 14px 18px 0 rgba(16, 42, 67, 0.06); }
+  .checker::before { content: ""; position: absolute; top: -9px; right: 22px; width: 42px; height: 18px; border-radius: 3px; background: var(--sun); transform: rotate(4deg); }
+  .checker h2 { margin: 0 0 8px; font-size: 21px; }
+  .checker-intro { margin: 0 0 24px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+  label { display: block; margin-bottom: 8px; color: var(--ink); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .input-row { display: flex; gap: 8px; }
+  input { width: 100%; min-width: 0; padding: 14px 13px; border: 1px solid #b8c7d2; border-radius: 6px; color: var(--ink); background: #fbfcfb; font: inherit; outline: none; }
+  input:focus { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(232, 93, 74, 0.16); }
+  button { flex: 0 0 auto; padding: 0 18px; border: 0; border-radius: 6px; color: #fff; background: var(--coral); font: inherit; font-weight: 700; cursor: pointer; }
+  button:hover { background: var(--coral-dark); }
+  button:disabled { cursor: wait; opacity: 0.65; }
+  .privacy-note { display: flex; gap: 8px; margin: 18px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+  .privacy-note::before { content: "✓"; color: var(--mint-dark); font-weight: 700; }
+  .section { padding: 54px 0 78px; }
+  .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+  .section-heading h2 { margin: 0; font-family: Georgia, serif; font-size: 32px; font-weight: 400; }
+  .section-heading p { max-width: 390px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .step { min-height: 155px; padding: 22px; border-top: 3px solid var(--coral); background: #fff; }
+  .step:nth-child(2) { border-top-color: var(--sun); }
+  .step:nth-child(3) { border-top-color: #73b9a3; }
+  .step-number { color: var(--muted); font-family: Georgia, serif; font-size: 13px; }
+  .step h3 { margin: 18px 0 8px; font-size: 17px; }
+  .step p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+  #result { display: none; margin-top: 20px; }
+  .result-card { padding: 24px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .result-card.safe { border-color: #9fd2bd; background: var(--mint); }
+  .result-card.alert { border-color: #efb2aa; background: #fff4f1; }
+  .result-kicker { margin: 0 0 8px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  .result-card h3 { margin: 0; font-family: Georgia, serif; font-size: 26px; font-weight: 400; }
+  .result-summary { margin: 10px 0 0; color: var(--muted); line-height: 1.55; }
+  .breach-list { display: grid; gap: 10px; margin-top: 20px; }
+  .breach-item { padding: 15px; border: 1px solid rgba(16, 42, 67, 0.1); background: rgba(255, 255, 255, 0.7); }
+  .breach-item strong { display: block; margin-bottom: 5px; }
+  .breach-item span { color: var(--muted); font-size: 13px; }
+  .advice { margin-top: 20px; padding: 17px; border-left: 3px solid var(--sun); white-space: pre-wrap; background: #fffdf3; line-height: 1.55; }
+  .error { padding: 14px; border: 1px solid #efb2aa; border-radius: 7px; color: var(--coral-dark); background: #fff4f1; }
+  footer { padding: 24px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+  @media (max-width: 760px) {
+    .shell { width: min(100% - 28px, 620px); }
+    .topbar-inner { align-items: flex-start; flex-direction: column; padding: 18px 0; }
+    .nav { justify-content: flex-start; gap: 7px 13px; }
+    .hero { padding: 50px 0 38px; background: #f6f8f5; }
+    .hero-grid { grid-template-columns: 1fr; gap: 38px; }
+    h1 { font-size: clamp(43px, 13vw, 62px); }
+    .hero-copy { font-size: 16px; }
+    .steps { grid-template-columns: 1fr; }
+    .section-heading { align-items: flex-start; flex-direction: column; }
+  }
+  @media (max-width: 440px) {
+    .input-row { flex-direction: column; }
+    button { min-height: 48px; }
+    .checker { padding: 22px; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><div class="brand-mark" aria-hidden="true"><span>⌁</span></div><div>Signal Check<small>privacy-first breach lookup</small></div></div>
+      <nav class="nav" aria-label="Site navigation"><span>Check an email</span><span>How it works</span><span>Privacy</span></nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="shell hero-grid">
+        <div>
+          <p class="eyebrow">Know what is exposed</p>
+          <h1>Your inbox should not be a mystery.</h1>
+          <p class="hero-copy">Check whether your Gmail or other email address appears in known data breaches. Get a clear read on what leaked and practical steps to lock things down.</p>
+        </div>
+
+        <form class="checker" id="checkForm">
+          <h2>Scan an email</h2>
+          <p class="checker-intro">We check breach metadata through the Have I Been Pwned API. Your address is never sent to the AI.</p>
+          <label for="emailInput">Email address</label>
+          <div class="input-row">
+            <input type="email" id="emailInput" placeholder="you@gmail.com" autocomplete="email" required>
+            <button id="checkBtn" type="submit">Check now</button>
+          </div>
+          <p class="privacy-note">No account. No history. Nothing is stored after your check.</p>
+          <div id="result" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="section shell" aria-labelledby="how-heading">
+      <div class="section-heading">
+        <h2 id="how-heading">A clearer way to check.</h2>
+        <p>One small check can reveal where to focus your security energy. We keep the result useful and the data footprint small.</p>
+      </div>
+      <div class="steps">
+        <article class="step"><span class="step-number">01</span><h3>Enter your address</h3><p>Use the email you want to investigate. We validate it before sending a request.</p></article>
+        <article class="step"><span class="step-number">02</span><h3>Review the exposure</h3><p>See known breach names, dates, and the categories of data involved.</p></article>
+        <article class="step"><span class="step-number">03</span><h3>Take back control</h3><p>Use tailored recommendations to change passwords, enable 2FA, and watch for phishing.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell">Signal Check is an independent interface for breach awareness. It does not store email addresses or breach results.</div></footer>
+
+<script>
+const form = document.getElementById('checkForm');
+const btn = document.getElementById('checkBtn');
+const input = document.getElementById('emailInput');
+const result = document.getElementById('result');
+
+function showResult(content, type) {
+  result.className = type ? `result-card ${type}` : '';
+  result.innerHTML = content;
+  result.style.display = 'block';
+}
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const email = input.value.trim();
+  if (!email) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+  showResult('<p class="result-kicker">Live lookup</p><h3>Checking your address...</h3><p class="result-summary">Querying known breach records securely.</p>', '');
+
+  try {
+    const response = await fetch('/check-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      showResult(`<div class="error">${data.error || 'Something went wrong. Please try again.'}</div>`, '');
+      return;
+    }
+
+    if (!data.breached) {
+      showResult('<p class="result-kicker">Clear signal</p><h3>No breaches found.</h3><p class="result-summary">We did not find this address in the breach records searched. Keep using unique passwords and two-factor authentication.</p>', 'safe');
+      return;
+    }
+
+    const items = data.breaches.map((breach) => `<div class="breach-item"><strong>${breach.name}</strong><span>${breach.date} · Exposed: ${breach.dataClasses.join(', ')}</span></div>`).join('');
+    showResult(`<p class="result-kicker">Action recommended</p><h3>Found in ${data.breaches.length} breach${data.breaches.length === 1 ? '' : 'es'}.</h3><p class="result-summary">Your address appears in known incident data. Review the exposure below, then start with the recommendations.</p><div class="breach-list">${items}</div><div class="advice"><strong>Security guidance</strong><br>${data.advice}</div>`, 'alert');
+  } catch (error) {
+    showResult('<div class="error">Network error. Make sure the local server is running, then try again.</div>', '');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Check now';
+  }
+});
+</script>
+</body>
+</html>
