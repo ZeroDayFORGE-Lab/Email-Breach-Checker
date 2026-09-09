@@ -156,6 +156,14 @@ const btn = document.getElementById('checkBtn');
 const input = document.getElementById('emailInput');
 const result = document.getElementById('result');
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function showResult(content, type) {
   result.className = type ? `result-card ${type}` : '';
   result.innerHTML = content;
@@ -180,7 +188,7 @@ form.addEventListener('submit', async (event) => {
     const data = await response.json();
 
     if (!response.ok) {
-      showResult(`<div class="error">${data.error || 'Something went wrong. Please try again.'}</div>`, '');
+      showResult(`<div class="error">${escapeHtml(data.error || 'Something went wrong. Please try again.')}</div>`, '');
       return;
     }
 
@@ -189,10 +197,10 @@ form.addEventListener('submit', async (event) => {
       return;
     }
 
-    const items = data.breaches.map((breach) => `<div class="breach-item"><strong>${breach.name}</strong><span>${breach.date} · Exposed: ${breach.dataClasses.join(', ')}</span></div>`).join('');
-    showResult(`<p class="result-kicker">Action recommended</p><h3>Found in ${data.breaches.length} breach${data.breaches.length === 1 ? '' : 'es'}.</h3><p class="result-summary">Your address appears in known incident data. Review the exposure below, then start with the recommendations.</p><div class="breach-list">${items}</div><div class="advice"><strong>Security guidance</strong><br>${data.advice}</div>`, 'alert');
+    const items = data.breaches.map((breach) => `<div class="breach-item"><strong>${escapeHtml(breach.name)}</strong><span>${escapeHtml(breach.date)} · Exposed: ${escapeHtml((breach.dataClasses || []).join(', '))}</span></div>`).join('');
+    showResult(`<p class="result-kicker">Action recommended</p><h3>Found in ${data.breaches.length} breach${data.breaches.length === 1 ? '' : 'es'}.</h3><p class="result-summary">Your address appears in known incident data. Review the exposure below, then start with the recommendations.</p><div class="breach-list">${items}</div><div class="advice"><strong>Security guidance</strong><br>${escapeHtml(data.advice || '')}</div>`, 'alert');
   } catch (error) {
-    showResult('<div class="error">Network error. Make sure the local server is running, then try again.</div>', '');
+    showResult('<div class="error">Network error. Please try again in a moment.</div>', '');
   } finally {
     btn.disabled = false;
     btn.textContent = 'Check now';
